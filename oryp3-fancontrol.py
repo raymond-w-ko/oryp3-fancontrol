@@ -68,7 +68,7 @@ def loop():
 
     gpu_temp = read_gpu_temp()
     if DEBUG:
-        print("GPU TEMP: %f" % (cpu_temp))
+        print("GPU TEMP: %f" % (gpu_temp))
     pwm_value = 255
     if gpu_temp < GPU_MIN_TEMP:
         pwm_value = GPU_MIN_FAN
