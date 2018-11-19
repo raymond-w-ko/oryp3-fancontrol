@@ -13,7 +13,7 @@ CPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon1/temp1_input"
 CPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1_enable"
 CPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1"
 
-CPU_MIN_TEMP = 45
+CPU_MIN_TEMP = 40
 CPU_MIN_FAN = 0
 CPU_MAX_TEMP = 75
 CPU_MAX_FAN = 255
