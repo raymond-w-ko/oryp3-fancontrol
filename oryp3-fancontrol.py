@@ -7,7 +7,8 @@ import re
 
 
 DEBUG = True
-CHECK_INTERVAL = 5
+# interval of 5 can cause GPU to not power down
+CHECK_INTERVAL = 10
 
 CPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon1/temp1_input"
 CPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1_enable"
@@ -39,7 +40,7 @@ def read_cpu_temp():
         return int(s) / 1000.0
 
 
-def read_gpu_temp():
+def read_gpu_temp_inefficient():
     proc = subprocess.Popen(["/usr/bin/nvidia-smi"], stdout=subprocess.PIPE)
     lines = list(map(lambda x: x.decode("utf-8").strip(), proc.stdout))
     line = lines[8]
@@ -48,6 +49,14 @@ def read_gpu_temp():
     assert temp_string.endswith("C")
     temp_string = temp_string[:-1]
     return int(temp_string)
+
+
+def read_gpu_temp():
+    proc = subprocess.Popen(
+        ["/usr/bin/nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader"],
+        stdout=subprocess.PIPE,
+    )
+    return int(proc.stdout.read().strip())
 
 
 def loop():
