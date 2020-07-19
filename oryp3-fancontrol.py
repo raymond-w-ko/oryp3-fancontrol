@@ -4,24 +4,25 @@ import sys
 import time
 import subprocess
 import re
+from threading import Thread
 
 
 DEBUG = True
 # interval of 5 can cause GPU to not power down
-CHECK_INTERVAL = 10
+CHECK_INTERVAL = 5
 
-CPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon1/temp1_input"
-CPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1_enable"
-CPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1"
+CPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon6/temp1_input"
+CPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon6/pwm1_enable"
+CPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon6/pwm1"
 
 CPU_MIN_TEMP = 40
 CPU_MIN_FAN = 0
 CPU_MAX_TEMP = 75
 CPU_MAX_FAN = 255
 
-GPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon1/temp2_input"
-GPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon1/pwm2_enable"
-GPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon1/pwm2"
+GPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon6/temp2_input"
+GPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon6/pwm2_enable"
+GPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon6/pwm2"
 
 GPU_MIN_TEMP = 40
 GPU_MIN_FAN = 0
@@ -51,12 +52,36 @@ def read_gpu_temp_inefficient():
     return int(temp_string)
 
 
-def read_gpu_temp():
+def read_gpu_temp_oneshot():
     proc = subprocess.Popen(
         ["/usr/bin/nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader"],
         stdout=subprocess.PIPE,
     )
     return int(proc.stdout.read().strip())
+
+
+def start_gpu_temp_control_thread():
+    proc = subprocess.Popen(
+        ["/usr/bin/nvidia-smi", "-l", "--query-gpu=temperature.gpu", "--format=csv,noheader"],
+        stdout=subprocess.PIPE,
+    )
+    for line in proc.stdout:
+        gpu_temp = int(line.strip())
+        if DEBUG:
+            print("GPU TEMP: %f" % (gpu_temp))
+        pwm_value = 255
+        if gpu_temp < GPU_MIN_TEMP:
+            pwm_value = GPU_MIN_FAN
+        elif gpu_temp > GPU_MAX_TEMP:
+            pwm_value = GPU_MAX_FAN
+        else:
+            p = (gpu_temp - GPU_MIN_TEMP) / (GPU_MAX_TEMP - GPU_MIN_TEMP)
+            pwm_value = int(p * 255)
+        _write(GPU_PWM_CONTROL, pwm_value)
+        if DEBUG:
+            print("GPU PWM: %f" % (pwm_value))
+        if DEBUG:
+            print("")
 
 
 def loop():
@@ -75,27 +100,15 @@ def loop():
     if DEBUG:
         print("CPU PWM: %f" % (pwm_value))
 
-    gpu_temp = read_gpu_temp()
-    if DEBUG:
-        print("GPU TEMP: %f" % (gpu_temp))
-    pwm_value = 255
-    if gpu_temp < GPU_MIN_TEMP:
-        pwm_value = GPU_MIN_FAN
-    elif gpu_temp > GPU_MAX_TEMP:
-        pwm_value = GPU_MAX_FAN
-    else:
-        p = (gpu_temp - GPU_MIN_TEMP) / (GPU_MAX_TEMP - GPU_MIN_TEMP)
-        pwm_value = int(p * 255)
-    _write(GPU_PWM_CONTROL, pwm_value)
-    if DEBUG:
-        print("GPU PWM: %f" % (pwm_value))
-
     if DEBUG:
         print("")
     time.sleep(CHECK_INTERVAL)
 
 
 def main(args):
+    t = Thread(target=start_gpu_temp_control_thread, daemon=True)
+    t.start()
+
     _write(CPU_PWM_ENABLE, "1")
     _write(GPU_PWM_ENABLE, "1")
     while True:
