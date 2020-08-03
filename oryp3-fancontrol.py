@@ -11,18 +11,18 @@ DEBUG = True
 # interval of 5 can cause GPU to not power down
 CHECK_INTERVAL = 5
 
-CPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon6/temp1_input"
-CPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon6/pwm1_enable"
-CPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon6/pwm1"
+CPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon1/temp1_input"
+CPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1_enable"
+CPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon1/pwm1"
 
 CPU_MIN_TEMP = 40
 CPU_MIN_FAN = 0
 CPU_MAX_TEMP = 75
 CPU_MAX_FAN = 255
 
-GPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon6/temp2_input"
-GPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon6/pwm2_enable"
-GPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon6/pwm2"
+GPU_TEMP_FILE = "/sys/devices/platform/system76/hwmon/hwmon1/temp2_input"
+GPU_PWM_ENABLE = "/sys/devices/platform/system76/hwmon/hwmon1/pwm2_enable"
+GPU_PWM_CONTROL = "/sys/devices/platform/system76/hwmon/hwmon1/pwm2"
 
 GPU_MIN_TEMP = 40
 GPU_MIN_FAN = 0
