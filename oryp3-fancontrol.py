@@ -12,7 +12,7 @@ DEBUG = True
 # interval of 5 can cause GPU to not power down
 CHECK_INTERVAL = 5
 
-SYS_PREFIX = "/sys/devices/platform/system76/hwmon/hwmon3"
+SYS_PREFIX = "/sys/devices/platform/system76/hwmon/hwmon3/"
 
 CPU_TEMP_FILE = SYS_PREFIX + "/temp1_input"
 CPU_PWM_ENABLE = SYS_PREFIX + "/pwm1_enable"
@@ -116,7 +116,7 @@ def loop():
 
 
 def main(_args):
-    print("manual fan control (write 1 > pwm*_enable")
+    print("manual fan control (write 1 > pwm*_enable)")
     _write(CPU_PWM_ENABLE, "1")
     _write(GPU_PWM_ENABLE, "1")
 
@@ -128,7 +128,7 @@ def main(_args):
 
 
 def resume_auto_fan_control():
-    print("resuming automatic fan control (write 2 > pwm*_enable")
+    print("resuming automatic fan control (write 2 > pwm*_enable)")
     _write(CPU_PWM_ENABLE, "2")
     _write(GPU_PWM_ENABLE, "2")
 
